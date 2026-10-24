@@ -7,3 +7,4 @@ incoming/
 processed/
 *.db
 .DS_Store
+hybrid_data/
