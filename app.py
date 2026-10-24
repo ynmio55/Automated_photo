@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import io
+import hashlib
 import os
 import secrets
 import threading
@@ -120,10 +121,12 @@ def scan_once() -> None:
                 time.sleep(0.25)
                 if (source.stat().st_size, source.stat().st_mtime_ns) != signature:
                     continue
-                name = source.stem + "-" + secrets.token_hex(3) + ".jpg"
+                fingerprint = hashlib.sha256(f"{source.name}:{signature}".encode()).hexdigest()[:12]
+                name = f"{source.stem}-{fingerprint}.jpg"
                 dest = OUTPUT / name
                 try:
-                    process_image(source, dest)
+                    if not dest.exists():
+                        process_image(source, dest)
                 except (UnidentifiedImageError, OSError, ValueError) as exc:
                     app.logger.warning("Cannot process %s: %s", source.name, exc)
                     continue
